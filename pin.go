@@ -10,7 +10,7 @@ import (
 
 const (
 	libraryVersion = "0.1"
-	defaultBaseURL = "https://api.pinboard.in/v1"
+	defaultBaseURL = "https://api.pinboard.in/v1/"
 	userAgent      = "pin/" + libraryVersion
 )
 
@@ -28,6 +28,8 @@ type Client struct {
 	authToken *AuthToken
 	BaseURL   *url.URL
 	UserAgent string
+
+	Posts *PostsService
 }
 
 // NewClient returns a new Pinboard API client. If a nil httpClient client is
@@ -46,6 +48,7 @@ func NewClient(httpClient *http.Client, authToken *AuthToken) *Client {
 		BaseURL:   baseURL,
 		UserAgent: userAgent,
 	}
+	c.Posts = &PostsService{c}
 	return c
 }
 
