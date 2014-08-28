@@ -1,9 +1,11 @@
 package pin
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type PostsService struct {
@@ -42,6 +44,41 @@ type postResp struct {
 	URL         string `xml:"href,attr"`
 	Tag         string `xml:"tag,attr"`
 	ToRead      string `xml:"toread,attr"`
+}
+
+// Add creates a new Post for the authenticated account.
+//
+// https://pinboard.in/api/#posts_add
+func (s *PostsService) Add(urlStr, title, description string, tags []string,
+	creationTime *time.Time, replace, shared,
+	toread bool) (*http.Response, error) {
+	var strTime string
+	if creationTime != nil {
+		strTime = creationTime.String()
+	}
+
+	params := &url.Values{
+		"url":         {urlStr},
+		"description": {title},
+		"extended":    {description},
+		"tags":        tags,
+		"dt":          {strTime},
+		"replace":     {fmt.Sprintf("%t", replace)},
+		"shared":      {fmt.Sprintf("%t", shared)},
+		"toread":      {fmt.Sprintf("%t", toread)},
+	}
+
+	req, err := s.client.NewRequest("posts/add", params)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // Recent fetches the most recent Posts for the authenticated account, filtered
