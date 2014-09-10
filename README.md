@@ -2,6 +2,8 @@
 
 Pin is a Go binding for the Pinboard API.
 
+**NOTICE**: Not complete, under active development.
+
 ## License
 
 The MIT License (MIT)
