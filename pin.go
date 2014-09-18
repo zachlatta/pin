@@ -30,6 +30,7 @@ type Client struct {
 	UserAgent string
 
 	Posts *PostsService
+	User  *UserService
 }
 
 // NewClient returns a new Pinboard API client. If a nil httpClient client is
@@ -49,6 +50,7 @@ func NewClient(httpClient *http.Client, authToken *AuthToken) *Client {
 		UserAgent: userAgent,
 	}
 	c.Posts = &PostsService{c}
+	c.User = &UserService{c}
 	return c
 }
 
