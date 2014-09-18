@@ -46,7 +46,8 @@ type postResp struct {
 	ToRead      string `xml:"toread,attr"`
 }
 
-// Add creates a new Post for the authenticated account.
+// Add creates a new Post for the authenticated account. urlStr and title are
+// required.
 //
 // https://pinboard.in/api/#posts_add
 func (s *PostsService) Add(urlStr, title, description string, tags []string,
@@ -69,6 +70,24 @@ func (s *PostsService) Add(urlStr, title, description string, tags []string,
 	}
 
 	req, err := s.client.NewRequest("posts/add", params)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// Delete deletes the specified Post from the authenticated account.
+//
+// https://pinboard.in/api/#posts_delete
+func (s *PostsService) Delete(urlStr string) (*http.Response, error) {
+	params := &url.Values{"url": {urlStr}}
+	req, err := s.client.NewRequest("posts/delete", params)
 	if err != nil {
 		return nil, err
 	}
