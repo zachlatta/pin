@@ -10,10 +10,16 @@ import (
 	"time"
 )
 
+// PostsService is the service for accessing Post-related calls from the
+// Pinboard API.
 type PostsService struct {
 	client *Client
 }
 
+// Post represents a post stored in Pinboard. Fields are transformed from the
+// actual response to be a bit more sane. For example, description from the
+// response is renamed to Title and the extended field is renamed to
+// Description.
 type Post struct {
 	Title       string
 	Description string
