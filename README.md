@@ -2,6 +2,8 @@
 
 Pin is a Go binding for the Pinboard API.
 
+Docs: http://godoc.org/github.com/zachlatta/pin
+
 **NOTICE**: Not complete, under active development.
 
 ## License
