@@ -90,7 +90,8 @@ func (s *PostsService) Add(urlStr, title, description string, tags []string,
 	return resp, nil
 }
 
-// Delete deletes the specified Post from the authenticated account.
+// Delete deletes the specified Post from the authenticated account where
+// urlStr is the URL of the Post to delete.
 //
 // https://pinboard.in/api/#posts_delete
 func (s *PostsService) Delete(urlStr string) (*http.Response, error) {
