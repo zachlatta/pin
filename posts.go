@@ -1,9 +1,11 @@
 package pin
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -101,16 +103,27 @@ func (s *PostsService) Delete(urlStr string) (*http.Response, error) {
 }
 
 // Recent fetches the most recent Posts for the authenticated account, filtered
-// by tag. Optional filtering params can be provided in p.
-//
-// Valid params to pass are:
-//
-// * tag - up to 3 tags to filter by
-// * count - number of results to return, default is 15, max is 100
+// by tag. Up to 3 tags can be specified to filter by. The max count is 100. If
+// a negative count is passed, then the default number of posts (15) is
+// returned.
 //
 // https://pinboard.in/api/#posts_recent
-func (s *PostsService) Recent(p *url.Values) ([]*Post, *http.Response, error) {
-	req, err := s.client.NewRequest("posts/recent", p)
+func (s *PostsService) Recent(tags []string, count int) ([]*Post,
+	*http.Response, error) {
+	if tags != nil && len(tags) < 3 {
+		return nil, nil, errors.New("too many tags (max is 3)")
+	}
+	if count > 100 {
+		return nil, nil, errors.New("count must be below 100")
+	}
+	if count < 0 {
+		count = 15
+	}
+
+	req, err := s.client.NewRequest("posts/recent", &url.Values{
+		"tag":   tags,
+		"count": {strconv.Itoa(count)},
+	})
 	if err != nil {
 		return nil, nil, err
 	}
