@@ -109,6 +109,24 @@ func (s *PostsService) Delete(urlStr string) (*http.Response, error) {
 	return resp, nil
 }
 
+// TODO
+//
+// https://pinboard.in/api#posts_get
+func (s *PostsService) Get() {
+}
+
+// TODO
+//
+// https://pinboard.in/api#posts_update
+func (s *PostsService) LastTimeUpdated() {
+}
+
+// TODO
+//
+// https://pinboard.in/api#posts_dates
+func (s *PostsService) Dates() {
+}
+
 // Recent fetches the most recent Posts for the authenticated account, filtered
 // by tag. Up to 3 tags can be specified to filter by. The max count is 100. If
 // a negative count is passed, then the default number of posts (15) is
@@ -150,4 +168,16 @@ func (s *PostsService) Recent(tags []string, count int) ([]*Post,
 	}
 
 	return posts, resp, nil
+}
+
+// TODO
+//
+// https://pinboard.in/api#posts_all
+func (s *PostsService) All() {
+}
+
+// TODO
+//
+// https://pinboard.in/api#posts_suggest
+func (s *PostsService) Suggest() {
 }
