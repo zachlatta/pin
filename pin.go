@@ -30,6 +30,7 @@ type Client struct {
 	UserAgent string
 
 	Posts *PostsService
+	Tags  *TagsService
 	User  *UserService
 }
 
@@ -50,6 +51,7 @@ func NewClient(httpClient *http.Client, authToken *AuthToken) *Client {
 		UserAgent: userAgent,
 	}
 	c.Posts = &PostsService{c}
+	c.Tags = &TagsService{c}
 	c.User = &UserService{c}
 	return c
 }
