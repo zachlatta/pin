@@ -32,6 +32,7 @@ type Client struct {
 	Posts *PostsService
 	Tags  *TagsService
 	User  *UserService
+	Notes *NotesService
 }
 
 // NewClient returns a new Pinboard API client. If a nil httpClient client is
@@ -53,6 +54,7 @@ func NewClient(httpClient *http.Client, authToken *AuthToken) *Client {
 	c.Posts = &PostsService{c}
 	c.Tags = &TagsService{c}
 	c.User = &UserService{c}
+	c.Notes = &NotesService{c}
 	return c
 }
 
