@@ -1,4 +1,4 @@
-package main
+package pin
 
 // TagsService is the service for accessing Tag-related calls from the
 // Pinboard API.
