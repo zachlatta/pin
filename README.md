@@ -1,6 +1,7 @@
 # Pin
 
-Pin is a Go binding for the Pinboard API.
+Pin is a Go binding for the Pinboard API. Do note, some methods and field names
+have been renamed for sanity.
 
 Docs: http://godoc.org/github.com/zachlatta/pin
 
