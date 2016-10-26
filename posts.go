@@ -109,10 +109,48 @@ func (s *PostsService) Delete(urlStr string) (*http.Response, error) {
 	return resp, nil
 }
 
-// TODO
+// Get returns one or more posts on a single day matching the arguments.
+// If no date or url is given, date of most recent bookmark will be used.
 //
 // https://pinboard.in/api#posts_get
-func (s *PostsService) Get() {
+func (s *PostsService) Get(tags []string, creationTime *time.Time, urlStr string) ([]*Post, *http.Response, error) {
+
+	params := &url.Values{}
+
+	if creationTime != nil {
+		params.Add("dt", creationTime.String())
+	}
+
+	if tags != nil && len(tags) > 3 {
+		return nil, nil, errors.New("too many tags (max is 3)")
+	} else if tags != nil {
+		params.Add("tags", strings.Join(tags, " "))
+	}
+
+	if len(urlStr) > 0 {
+		params.Add("url", urlStr)
+	}
+
+	req, err := s.client.NewRequest("posts/get", params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var result struct {
+		Posts []*postResp `xml:"post"`
+	}
+
+	resp, err := s.client.Do(req, &result)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	posts := make([]*Post, len(result.Posts))
+	for i, v := range result.Posts {
+		posts[i] = newPostFromPostResp(v)
+	}
+
+	return posts, resp, nil
 }
 
 // TODO
