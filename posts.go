@@ -27,6 +27,7 @@ type Post struct {
 	URL         string
 	Tags        []string
 	ToRead      bool
+	Time        *time.Time
 }
 
 func newPostFromPostResp(presp *postResp) *Post {
@@ -35,6 +36,8 @@ func newPostFromPostResp(presp *postResp) *Post {
 		toRead = true
 	}
 
+	dt, _ := time.Parse("2006-01-02T15:04:05Z", presp.Time)
+
 	return &Post{
 		Title:       presp.Title,
 		Description: presp.Description,
@@ -42,6 +45,7 @@ func newPostFromPostResp(presp *postResp) *Post {
 		URL:         presp.URL,
 		Tags:        strings.Split(presp.Tag, " "),
 		ToRead:      toRead,
+		Time:        &dt,
 	}
 }
 
@@ -52,6 +56,7 @@ type postResp struct {
 	URL         string `xml:"href,attr"`
 	Tag         string `xml:"tag,attr"`
 	ToRead      string `xml:"toread,attr"`
+	Time        string `xml:"time,attr"`
 }
 
 // Add creates a new Post for the authenticated account. urlStr and title are
