@@ -135,7 +135,7 @@ func (s *PostsService) Dates() {
 // https://pinboard.in/api/#posts_recent
 func (s *PostsService) Recent(tags []string, count int) ([]*Post,
 	*http.Response, error) {
-	if tags != nil && len(tags) < 3 {
+	if tags != nil && len(tags) > 3 {
 		return nil, nil, errors.New("too many tags (max is 3)")
 	}
 	if count > 100 {
