@@ -224,3 +224,24 @@ func TestPostsDates(t *testing.T) {
 		t.Errorf("Retrieved wrong count - expected 15 got %d", dates[1].Count)
 	}
 }
+
+func TestPostsSuggest(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/suggest?auth_token=user%3Atoken",
+		httpmock.NewStringResponder(200, readFixture("posts_suggest")))
+
+	popular, recommended, _, err := client.Posts.Suggest()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(popular) != 4 {
+		t.Errorf("Retrieved wrong amount of popular tags - expected 4 got %d", len(popular))
+	}
+
+	if len(recommended) != 10 {
+		t.Errorf("Retrieved wrong amount of popular tags - recommended 10 got %d", len(recommended))
+	}
+}

@@ -354,5 +354,20 @@ func (s *PostsService) All(tags []string, start int, results int, fromdt, todt *
 // TODO
 //
 // https://pinboard.in/api#posts_suggest
-func (s *PostsService) Suggest() {
+func (s *PostsService) Suggest() ([]string, []string, *http.Response, error) {
+	req, err := s.client.NewRequest("posts/suggest", nil)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	var result struct {
+		Popular     []string `xml:"popular"`
+		Recommended []string `xml:"recommended"`
+	}
+
+	resp, err := s.client.Do(req, &result)
+	if err != nil {
+		return nil, nil, resp, err
+	}
+	return result.Popular, result.Recommended, resp, nil
 }
