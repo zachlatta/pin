@@ -1,7 +1,6 @@
 package pin
 
 import (
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -11,26 +10,16 @@ import (
 )
 
 var (
-	token  = AuthToken{Username: "user", Token: "token"}
-	client = NewClient(nil, &token)
-	time1  = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-	time2  = time.Date(2009, time.December, 10, 23, 0, 0, 0, time.UTC)
+	time1 = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+	time2 = time.Date(2009, time.December, 10, 23, 0, 0, 0, time.UTC)
 )
-
-func readFixture(filename string) string {
-	data, err := ioutil.ReadFile("testdata/" + filename + ".xml")
-	if err != nil {
-		panic(err)
-	}
-	return string(data)
-}
 
 func TestPostsAdd(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/add?auth_token=user%3Atoken&description=Title&dt=2009-11-10T23%3A00%3A00Z&extended=Description&replace=true&shared=true&tags=one&tags=two&tags=three&tags=four&toread=true&url=http%3A%2F%2Fexample.org",
-		httpmock.NewStringResponder(200, readFixture("posts_ok")))
+		httpmock.NewStringResponder(200, readFixture("ok")))
 
 	tags := []string{"one", "two", "three", "four"}
 	_, err := client.Posts.Add("http://example.org", "Title", "Description", tags, &time1, true, true, true)
@@ -44,7 +33,7 @@ func TestPostsDelete(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 
 	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/delete?auth_token=user%3Atoken&url=http%3A%2F%2Fexample.org",
-		httpmock.NewStringResponder(200, readFixture("posts_ok")))
+		httpmock.NewStringResponder(200, readFixture("ok")))
 
 	_, err := client.Posts.Delete("http://example.org")
 	if err != nil {
