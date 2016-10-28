@@ -351,7 +351,8 @@ func (s *PostsService) All(tags []string, start int, results int, fromdt, todt *
 
 }
 
-// TODO
+// Returns a list of popular tags and recommended tags for a given URL.
+// Popular tags are tags used site-wide for the url; recommended tags are drawn from the user's own tags.
 //
 // https://pinboard.in/api#posts_suggest
 func (s *PostsService) Suggest() ([]string, []string, *http.Response, error) {
