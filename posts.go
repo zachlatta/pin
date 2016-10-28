@@ -16,6 +16,11 @@ type PostsService struct {
 	client *Client
 }
 
+const (
+	timeLayoutFull  = "2006-01-02T15:04:05Z"
+	timeLayoutShort = "2006-01-02"
+)
+
 // Post represents a post stored in Pinboard. Fields are transformed from the
 // actual response to be a bit more sane. For example, description from the
 // response is renamed to Title and the extended field is renamed to
@@ -30,15 +35,13 @@ type Post struct {
 	Time        *time.Time
 }
 
-const timeLayout = "2006-01-02T15:04:05Z"
-
 func newPostFromPostResp(presp *postResp) *Post {
 	var toRead bool
 	if presp.ToRead == "yes" {
 		toRead = true
 	}
 
-	dt, _ := time.Parse(timeLayout, presp.Time)
+	dt, _ := time.Parse(timeLayoutFull, presp.Time)
 
 	return &Post{
 		Title:       presp.Title,
@@ -61,6 +64,33 @@ type postResp struct {
 	Time        string `xml:"time,attr"`
 }
 
+//
+type Date struct {
+	Count int
+	Date  *time.Time
+}
+
+func newDateFromPostResp(dresp *dateResp) (*Date, error) {
+	dt, err := time.Parse(timeLayoutShort, dresp.Date)
+	if err != nil {
+		return nil, err
+	}
+	c, err := strconv.Atoi(dresp.Count)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Date{
+		Count: c,
+		Date:  &dt,
+	}, nil
+}
+
+type dateResp struct {
+	Count string `xml:"count,attr"`
+	Date  string `xml:"date,attr"`
+}
+
 // Add creates a new Post for the authenticated account. urlStr and title are
 // required.
 //
@@ -70,7 +100,7 @@ func (s *PostsService) Add(urlStr, title, description string, tags []string,
 	toread bool) (*http.Response, error) {
 	var strTime string
 	if creationTime != nil {
-		strTime = creationTime.Format(timeLayout)
+		strTime = creationTime.Format(timeLayoutFull)
 	}
 
 	params := &url.Values{
@@ -125,7 +155,7 @@ func (s *PostsService) Get(tags []string, creationTime *time.Time, urlStr string
 	params := &url.Values{}
 
 	if creationTime != nil {
-		params.Add("dt", creationTime.Format(timeLayout))
+		params.Add("dt", creationTime.Format(timeLayoutFull))
 	}
 
 	if tags != nil && len(tags) > 3 {
@@ -179,7 +209,7 @@ func (s *PostsService) LastTimeUpdated() (*time.Time, *http.Response, error) {
 		return nil, resp, err
 	}
 
-	updated, err := time.Parse(timeLayout, result.Time)
+	updated, err := time.Parse(timeLayoutFull, result.Time)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -187,10 +217,42 @@ func (s *PostsService) LastTimeUpdated() (*time.Time, *http.Response, error) {
 	return &updated, resp, nil
 }
 
-// TODO
+// Returns a list of dates with the number of posts at each date.
 //
 // https://pinboard.in/api#posts_dates
-func (s *PostsService) Dates() {
+func (s *PostsService) Dates(tags []string) ([]*Date, *http.Response, error) {
+	params := &url.Values{}
+
+	if tags != nil && len(tags) > 3 {
+		return nil, nil, errors.New("too many tags (max is 3)")
+	} else if tags != nil && len(tags) > 0 {
+		params.Add("tags", strings.Join(tags, " "))
+	}
+
+	req, err := s.client.NewRequest("posts/dates", params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var result struct {
+		Dates []*dateResp `xml:"date"`
+	}
+
+	resp, err := s.client.Do(req, &result)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	dates := make([]*Date, len(result.Dates))
+	for i, v := range result.Dates {
+		d, err := newDateFromPostResp(v)
+		if err != nil {
+			return nil, nil, err
+		}
+		dates[i] = d
+	}
+
+	return dates, resp, nil
 }
 
 // Recent fetches the most recent Posts for the authenticated account, filtered
@@ -259,11 +321,11 @@ func (s *PostsService) All(tags []string, start int, results int, fromdt, todt *
 	}
 
 	if fromdt != nil {
-		params.Add("fromdt", fromdt.Format(timeLayout))
+		params.Add("fromdt", fromdt.Format(timeLayoutFull))
 	}
 
 	if todt != nil {
-		params.Add("todt", todt.Format(timeLayout))
+		params.Add("todt", todt.Format(timeLayoutFull))
 	}
 
 	req, err := s.client.NewRequest("posts/all", params)

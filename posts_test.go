@@ -200,7 +200,27 @@ func TestPostsUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if upd.Format(timeLayout) != "2011-03-24T19:02:07Z" {
-		t.Error("Wrong time recieved, expected 2011-03-24T19:02:07Z got %s", upd.Format(timeLayout))
+	if upd.Format(timeLayoutFull) != "2011-03-24T19:02:07Z" {
+		t.Error("Wrong time recieved, expected 2011-03-24T19:02:07Z got %s", upd.Format(timeLayoutFull))
+	}
+}
+
+func TestPostsDates(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/dates?auth_token=user%3Atoken&tags=argentina",
+		httpmock.NewStringResponder(200, readFixture("posts_dates")))
+
+	tags := []string{"argentina"}
+	dates, _, err := client.Posts.Dates(tags)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(dates) != 8 {
+		t.Errorf("Retrieved wrong amount - expected 8 got %d", len(dates))
+	} else if dates[1].Count != 15 {
+		t.Errorf("Retrieved wrong count - expected 15 got %d", dates[1].Count)
 	}
 }
