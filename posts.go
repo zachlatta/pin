@@ -160,10 +160,31 @@ func (s *PostsService) Get(tags []string, creationTime *time.Time, urlStr string
 	return posts, resp, nil
 }
 
-// TODO
+// Returns the most recent time a bookmark was added, updated or deleted.
+// Use this before calling posts/all to see if the data has changed since the last fetch.
 //
 // https://pinboard.in/api#posts_update
-func (s *PostsService) LastTimeUpdated() {
+func (s *PostsService) LastTimeUpdated() (*time.Time, *http.Response, error) {
+	req, err := s.client.NewRequest("posts/update", &url.Values{})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var result struct {
+		Time string `xml:"time,attr"`
+	}
+
+	resp, err := s.client.Do(req, &result)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	updated, err := time.Parse(timeLayout, result.Time)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return &updated, resp, nil
 }
 
 // TODO

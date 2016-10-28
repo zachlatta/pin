@@ -29,12 +29,11 @@ func TestPostsAdd(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/add?auth_token=user%3Atoken&description=Title&dt=2006-01-02T15%3A04%3A00Z&extended=Description&replace=true&shared=true&tags=one&tags=two&tags=three&tags=four&toread=true&url=http%3A%2F%2Fexample.org",
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/add?auth_token=user%3Atoken&description=Title&dt=2009-11-10T23%3A00%3A00Z&extended=Description&replace=true&shared=true&tags=one&tags=two&tags=three&tags=four&toread=true&url=http%3A%2F%2Fexample.org",
 		httpmock.NewStringResponder(200, readFixture("posts_ok")))
 
 	tags := []string{"one", "two", "three", "four"}
-	creation, _ := time.Parse(time.RFC822, time.RFC822)
-	_, err := client.Posts.Add("http://example.org", "Title", "Description", tags, &creation, true, true, true)
+	_, err := client.Posts.Add("http://example.org", "Title", "Description", tags, &time1, true, true, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -186,5 +185,22 @@ func TestPostsAllUrls(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+	}
+}
+
+func TestPostsUpdate(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/update?auth_token=user%3Atoken",
+		httpmock.NewStringResponder(200, readFixture("posts_update")))
+
+	upd, _, err := client.Posts.LastTimeUpdated()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if upd.Format(timeLayout) != "2011-03-24T19:02:07Z" {
+		t.Error("Wrong time recieved, expected 2011-03-24T19:02:07Z got %s", upd.Format(timeLayout))
 	}
 }
