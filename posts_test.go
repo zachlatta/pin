@@ -107,5 +107,58 @@ func TestPostsRecentHighCount(t *testing.T) {
 	if err.Error() != "count must be below 100" {
 		t.Error(err)
 	}
+}
 
+func TestPostsAll(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&tags=webdev",
+		httpmock.NewStringResponder(200, readFixture("posts_all")))
+
+	tags := []string{"webdev"}
+	posts, _, err := client.Posts.All(tags, 0, 0, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(posts) != 2 {
+		t.Errorf("Retrieved wrong amount - expected 2 got %s", len(posts))
+	}
+
+	if strings.Compare(posts[0].URL, "http://www.weather.com/") != 0 {
+		t.Errorf("Retrieved wrong results (%s)", posts[0].URL)
+	}
+}
+
+var t1 = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+var t2 = time.Date(2009, time.December, 10, 23, 0, 0, 0, time.UTC)
+
+var postsAllUrlTests = []struct {
+	in_tags    []string
+	in_start   int
+	in_results int
+	in_fromdt  *time.Time
+	in_todt    *time.Time
+	out_url    string
+}{
+	{[]string{}, 0, 0, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken"},
+	{[]string{"webdev"}, 0, 0, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&tags=webdev"},
+	{[]string{}, 10, 300, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&results=300&start=10"},
+	{[]string{}, 0, 0, &t1, &t2, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&fromdt=2009-11-10T23%3A00%3A00Z&todt=2009-12-10T23%3A00%3A00Z"},
+}
+
+func TestPostsAllUrls(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	for _, tt := range postsAllUrlTests {
+		httpmock.Reset()
+		httpmock.RegisterResponder("GET", tt.out_url,
+			httpmock.NewStringResponder(200, readFixture("posts_all")))
+		_, _, err := client.Posts.All(tt.in_tags, tt.in_start, tt.in_results, tt.in_fromdt, tt.in_todt)
+		if err != nil {
+			t.Error(err)
+		}
+	}
 }

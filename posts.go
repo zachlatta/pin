@@ -215,10 +215,57 @@ func (s *PostsService) Recent(tags []string, count int) ([]*Post,
 	return posts, resp, nil
 }
 
-// TODO
+// All fetches all bookmarks in the user's account.
 //
 // https://pinboard.in/api#posts_all
-func (s *PostsService) All() {
+func (s *PostsService) All(tags []string, start int, results int, fromdt, todt *time.Time) ([]*Post,
+	*http.Response, error) {
+
+	params := &url.Values{}
+
+	if tags != nil && len(tags) > 3 {
+		return nil, nil, errors.New("too many tags (max is 3)")
+	} else if tags != nil && len(tags) > 0 {
+		params.Add("tags", strings.Join(tags, " "))
+	}
+
+	if start > 0 {
+		params.Add("start", strconv.Itoa(start))
+	}
+
+	if results > 0 {
+		params.Add("results", strconv.Itoa(results))
+	}
+
+	if fromdt != nil {
+		params.Add("fromdt", fromdt.Format(timeLayout))
+	}
+
+	if todt != nil {
+		params.Add("todt", todt.Format(timeLayout))
+	}
+
+	req, err := s.client.NewRequest("posts/all", params)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var result struct {
+		Posts []*postResp `xml:"post"`
+	}
+
+	resp, err := s.client.Do(req, &result)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	posts := make([]*Post, len(result.Posts))
+	for i, v := range result.Posts {
+		posts[i] = newPostFromPostResp(v)
+	}
+
+	return posts, resp, nil
+
 }
 
 // TODO
