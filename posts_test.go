@@ -13,6 +13,8 @@ import (
 var (
 	token  = AuthToken{Username: "user", Token: "token"}
 	client = NewClient(nil, &token)
+	time1  = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+	time2  = time.Date(2009, time.December, 10, 23, 0, 0, 0, time.UTC)
 )
 
 func readFixture(filename string) string {
@@ -70,6 +72,33 @@ func TestPostsGet(t *testing.T) {
 
 	if strings.Compare(posts[0].URL, "http://www.howtocreate.co.uk/tutorials/texterise.php?dom=1") != 0 {
 		t.Error("Retrieved wrong results")
+	}
+}
+
+var postsGetUrlTests = []struct {
+	in_tags     []string
+	in_creation *time.Time
+	in_urlstr   string
+	out_url     string
+}{
+	{[]string{}, nil, "", "https://api.pinboard.in/v1/posts/get?auth_token=user%3Atoken"},
+	{[]string{"web", "dev"}, nil, "", "https://api.pinboard.in/v1/posts/get?auth_token=user%3Atoken&tags=web+dev"},
+	{[]string{}, &time1, "", "https://api.pinboard.in/v1/posts/get?auth_token=user%3Atoken&dt=2009-11-10T23%3A00%3A00Z"},
+	{[]string{}, nil, "http://example.org", "https://api.pinboard.in/v1/posts/get?auth_token=user%3Atoken&url=http%3A%2F%2Fexample.org"},
+}
+
+func TestPostsGetUrls(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	for _, tt := range postsGetUrlTests {
+		httpmock.Reset()
+		httpmock.RegisterResponder("GET", tt.out_url,
+			httpmock.NewStringResponder(200, readFixture("posts_get")))
+		_, _, err := client.Posts.Get(tt.in_tags, tt.in_creation, tt.in_urlstr)
+		if err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -131,9 +160,6 @@ func TestPostsAll(t *testing.T) {
 	}
 }
 
-var t1 = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-var t2 = time.Date(2009, time.December, 10, 23, 0, 0, 0, time.UTC)
-
 var postsAllUrlTests = []struct {
 	in_tags    []string
 	in_start   int
@@ -145,7 +171,7 @@ var postsAllUrlTests = []struct {
 	{[]string{}, 0, 0, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken"},
 	{[]string{"webdev"}, 0, 0, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&tags=webdev"},
 	{[]string{}, 10, 300, nil, nil, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&results=300&start=10"},
-	{[]string{}, 0, 0, &t1, &t2, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&fromdt=2009-11-10T23%3A00%3A00Z&todt=2009-12-10T23%3A00%3A00Z"},
+	{[]string{}, 0, 0, &time1, &time2, "https://api.pinboard.in/v1/posts/all?auth_token=user%3Atoken&fromdt=2009-11-10T23%3A00%3A00Z&todt=2009-12-10T23%3A00%3A00Z"},
 }
 
 func TestPostsAllUrls(t *testing.T) {

@@ -130,7 +130,7 @@ func (s *PostsService) Get(tags []string, creationTime *time.Time, urlStr string
 
 	if tags != nil && len(tags) > 3 {
 		return nil, nil, errors.New("too many tags (max is 3)")
-	} else if tags != nil {
+	} else if tags != nil && len(tags) > 0 {
 		params.Add("tags", strings.Join(tags, " "))
 	}
 
