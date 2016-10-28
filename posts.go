@@ -30,13 +30,15 @@ type Post struct {
 	Time        *time.Time
 }
 
+const timeLayout = "2006-01-02T15:04:05Z"
+
 func newPostFromPostResp(presp *postResp) *Post {
 	var toRead bool
 	if presp.ToRead == "yes" {
 		toRead = true
 	}
 
-	dt, _ := time.Parse("2006-01-02T15:04:05Z", presp.Time)
+	dt, _ := time.Parse(timeLayout, presp.Time)
 
 	return &Post{
 		Title:       presp.Title,
@@ -68,7 +70,7 @@ func (s *PostsService) Add(urlStr, title, description string, tags []string,
 	toread bool) (*http.Response, error) {
 	var strTime string
 	if creationTime != nil {
-		strTime = creationTime.String()
+		strTime = creationTime.Format(timeLayout)
 	}
 
 	params := &url.Values{
@@ -123,7 +125,7 @@ func (s *PostsService) Get(tags []string, creationTime *time.Time, urlStr string
 	params := &url.Values{}
 
 	if creationTime != nil {
-		params.Add("dt", creationTime.String())
+		params.Add("dt", creationTime.Format(timeLayout))
 	}
 
 	if tags != nil && len(tags) > 3 {

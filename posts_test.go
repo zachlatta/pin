@@ -27,7 +27,7 @@ func TestPostsAdd(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/add?auth_token=user%3Atoken&description=Title&dt=2006-01-02+15%3A04%3A00+%2B0000+MST&extended=Description&replace=true&shared=true&tags=one&tags=two&tags=three&tags=four&toread=true&url=http%3A%2F%2Fexample.org",
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/add?auth_token=user%3Atoken&description=Title&dt=2006-01-02T15%3A04%3A00Z&extended=Description&replace=true&shared=true&tags=one&tags=two&tags=three&tags=four&toread=true&url=http%3A%2F%2Fexample.org",
 		httpmock.NewStringResponder(200, readFixture("posts_ok")))
 
 	tags := []string{"one", "two", "three", "four"}
@@ -65,11 +65,11 @@ func TestPostsGet(t *testing.T) {
 	}
 
 	if len(posts) != 1 {
-		t.Error("Retrieved wrong amount")
+		t.Errorf("Retrieved wrong amount - expected 1 got %s", len(posts))
 	}
 
 	if strings.Compare(posts[0].URL, "http://www.howtocreate.co.uk/tutorials/texterise.php?dom=1") != 0 {
-		t.Error("Retrieved wrong amount")
+		t.Error("Retrieved wrong results")
 	}
 }
 
