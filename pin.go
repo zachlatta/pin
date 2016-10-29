@@ -2,6 +2,7 @@ package pin
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,6 +43,7 @@ type Client struct {
 func NewClient(httpClient *http.Client, authToken *AuthToken) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
+
 	}
 	baseURL, _ := url.Parse(defaultBaseURL)
 
@@ -97,6 +99,11 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	switch resp.StatusCode {
+	case http.StatusTooManyRequests, http.StatusUnauthorized:
+		return nil, errors.New(http.StatusText(resp.StatusCode))
 	}
 
 	defer resp.Body.Close()
