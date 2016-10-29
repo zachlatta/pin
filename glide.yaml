@@ -1,0 +1,3 @@
+package: github.com/zachlatta/pin
+import:
+- package: github.com/jarcoal/httpmock
