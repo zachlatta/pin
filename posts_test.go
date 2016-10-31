@@ -218,10 +218,10 @@ func TestPostsSuggest(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
-	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/suggest?auth_token=user%3Atoken",
+	httpmock.RegisterResponder("GET", "https://api.pinboard.in/v1/posts/suggest?auth_token=user%3Atoken&url=https%3A%2F%2Fexample.org",
 		httpmock.NewStringResponder(200, readFixture("posts_suggest")))
 
-	popular, recommended, _, err := client.Posts.Suggest()
+	popular, recommended, _, err := client.Posts.Suggest("https://example.org")
 	if err != nil {
 		t.Error(err)
 	}

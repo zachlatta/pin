@@ -355,8 +355,13 @@ func (s *PostsService) All(tags []string, start int, results int, fromdt, todt *
 // Popular tags are tags used site-wide for the url; recommended tags are drawn from the user's own tags.
 //
 // https://pinboard.in/api#posts_suggest
-func (s *PostsService) Suggest() ([]string, []string, *http.Response, error) {
-	req, err := s.client.NewRequest("posts/suggest", nil)
+func (s *PostsService) Suggest(urlStr string) ([]string, []string, *http.Response, error) {
+
+	params := &url.Values{
+		"url": {urlStr},
+	}
+
+	req, err := s.client.NewRequest("posts/suggest", params)
 	if err != nil {
 		return nil, nil, nil, err
 	}
